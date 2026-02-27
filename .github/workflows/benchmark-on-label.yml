@@ -31,7 +31,7 @@ jobs:
         with:
           path: valkey
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Checkout valkey-perf-benchmark
@@ -94,7 +94,7 @@ jobs:
           # Base benchmark arguments
           BENCHMARK_ARGS=(
             --config "$CONFIG_FILE"
-            --commits "${{ github.event.pull_request.merge_commit_sha }}"
+            --commits "${{ github.event.pull_request.head.sha }}"
             --baseline "${{ github.event.pull_request.base.ref }}"
             --valkey-benchmark-path "$VALKEY_BENCHMARK_PATH"
             --target-ip ${{ secrets.EC2_ARM64_IP }}
@@ -111,7 +111,7 @@ jobs:
         run: |
           python ./utils/compare_benchmark_results.py \
             --baseline ./results/${{ github.event.pull_request.base.ref }}/metrics.json \
-            --new ./results/${{ github.event.pull_request.merge_commit_sha }}/metrics.json \
+            --new ./results/${{ github.event.pull_request.head.sha }}/metrics.json \
             --output ../comparison.md \
             --metrics rps
 
@@ -122,7 +122,7 @@ jobs:
         with:
           name: benchmark-results
           path: |
-            ./valkey-perf-benchmark/results/${{ github.event.pull_request.merge_commit_sha }}/metrics.json
+            ./valkey-perf-benchmark/results/${{ github.event.pull_request.head.sha }}/metrics.json
             ./valkey-perf-benchmark/results/${{ github.event.pull_request.base.ref }}/metrics.json
             comparison.md
 
